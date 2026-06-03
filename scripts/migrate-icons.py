@@ -46,7 +46,7 @@ SIZES = {
 }
 
 
-def remove_white_bg(img: Image.Image, threshold: int = 245) -> Image.Image:
+def remove_white_bg(img: Image.Image, threshold: int = 238) -> Image.Image:
     img = img.convert("RGBA")
     pixels = img.load()
     w, h = img.size
@@ -61,12 +61,12 @@ def remove_white_bg(img: Image.Image, threshold: int = 245) -> Image.Image:
 def optimize(src_path: Path, name: str) -> None:
     img = Image.open(src_path)
     max_w = SIZES.get(name, SIZES["default"])
+    img = remove_white_bg(img)
     if name == "progress-bar":
         if img.width > max_w:
             ratio = max_w / img.width
             img = img.resize((max_w, int(img.height * ratio)), Image.LANCZOS)
     else:
-        img = remove_white_bg(img)
         w, h = img.size
         scale = min(1.0, max_w / max(w, h))
         if scale < 1.0:
