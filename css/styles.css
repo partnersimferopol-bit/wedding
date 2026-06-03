@@ -116,7 +116,7 @@ body.game-intro .hero-backdrop {
 }
 
 body.game-intro .hero-cover-img {
-  max-height: min(82svh, 920px);
+  max-height: min(72svh, 820px);
 }
 
 .hero-backdrop::after {
@@ -357,15 +357,18 @@ body.game-flow:not(.game-intro) .particles {
   }
 }
 
-/* Intro — полноэкранная обложка */
+/* Intro — обложка + кнопка сразу под изображением */
 .intro {
   padding: 0;
   width: 100%;
-  min-height: 100dvh;
-  min-height: 100svh;
-  flex: 1;
+  min-height: 0;
+  flex: 0 0 auto;
   position: relative;
   background: transparent;
+}
+
+body.game-intro .progress-wrap {
+  display: none;
 }
 
 .intro::before {
@@ -373,16 +376,16 @@ body.game-flow:not(.game-intro) .particles {
 }
 
 .intro-content {
-  position: absolute;
+  position: relative;
   z-index: 2;
   left: 0;
   right: 0;
-  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  padding: 0 max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
+  margin-top: 8px;
+  padding: 0 max(16px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom))
     max(16px, env(safe-area-inset-left));
   text-align: center;
   pointer-events: none;
