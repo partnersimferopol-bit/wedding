@@ -79,14 +79,29 @@ def optimize(src_path: Path, name: str) -> None:
     print(f"OK {name}: {png_path.stat().st_size // 1024}KB png, {webp_path.stat().st_size // 1024}KB webp")
 
 
+def resolve_src(key: str) -> Path | None:
+    """Ищет файл в «иконки» по точному имени или по UUID (в т.ч. «… копия»)."""
+    exact = SRC / key
+    if exact.exists():
+        return exact
+    stem = Path(key).stem
+    for f in sorted(SRC.iterdir()):
+        if not f.is_file():
+            continue
+        if f.stem.startswith(stem) or f.name.startswith(stem):
+            return f
+    return None
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     created = set()
     for src_name, dest in FILE_MAP.items():
-        src = SRC / src_name
-        if not src.exists():
+        src = resolve_src(src_name)
+        if src is None:
             print("MISSING", src_name)
             continue
+        print(f"from {src.name} -> {dest}")
         optimize(src, dest)
         created.add(dest)
 
@@ -96,7 +111,7 @@ def main():
         for ext in (".png", ".webp"):
             src_f = OUT / f"{target}{ext}"
             dst_f = OUT / f"{alias}{ext}"
-            if src_f.exists() and not dst_f.exists():
+            if src_f.exists():
                 dst_f.write_bytes(src_f.read_bytes())
                 print(f"alias {alias}{ext} <- {target}")
 
