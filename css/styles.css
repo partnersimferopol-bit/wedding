@@ -243,12 +243,18 @@ body.game-flow:not(.game-intro) .particles {
 /* Progress */
 .progress-wrap {
   width: 100%;
-  padding: 12px 16px 0;
+  padding: 8px 12px 0;
   opacity: 0;
   transition: opacity 0.3s;
+  flex: 0 0 auto;
+}
+
+.progress-wrap:not(.visible) {
+  display: none;
 }
 
 .progress-wrap.visible {
+  display: block;
   opacity: 1;
 }
 
@@ -257,7 +263,7 @@ body.game-flow:not(.game-intro) .particles {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .progress-step-icon {
@@ -282,7 +288,7 @@ body.game-flow:not(.game-intro) .particles {
 }
 
 .progress-track {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .progress-bar {
@@ -861,14 +867,15 @@ body.game-intro .progress-wrap {
 
 /* Result */
 .result {
-  padding-bottom: 32px;
+  padding-top: 8px;
+  padding-bottom: 24px;
 }
 
 .gift-visual {
   border-radius: 20px;
-  padding: 32px 24px;
+  padding: 10px 12px 14px;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   box-shadow: 0 12px 40px var(--shadow);
   border: 1px solid rgba(92, 70, 54, 0.1);
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
@@ -877,20 +884,21 @@ body.game-intro .progress-wrap {
 .gift-picture {
   display: block;
   width: 100%;
-  margin: 0 0 16px;
+  margin: 0 0 10px;
   border-radius: 14px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.5);
+  background: transparent;
   line-height: 0;
 }
 
 .gift-img {
   width: 100%;
   height: auto;
-  max-height: min(58vh, 400px);
-  object-fit: cover;
-  object-position: center;
+  max-height: min(50vh, 360px);
+  object-fit: contain;
+  object-position: top center;
   display: block;
+  vertical-align: top;
   opacity: 0;
   transition: opacity 0.35s ease;
 }
