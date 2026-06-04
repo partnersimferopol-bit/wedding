@@ -109,6 +109,7 @@
         <span class="step-icon" aria-hidden="true"></span>
         <p class="step">Вопрос 4</p>
         <h2>Какие слова ты хочешь сказать через этот подарок?</h2>
+        <p class="question-note" id="q4-note"></p>
       </div>
       <div class="input-wrap">
         <textarea id="words-input" placeholder="Напиши от души…"></textarea>
@@ -130,6 +131,7 @@
         <span class="step-icon" aria-hidden="true"></span>
         <p class="step">Вопрос 5 <span class="optional-badge">(опционально)</span></p>
         <h2>Добавь важные детали</h2>
+        <p class="question-note" id="q5-note"></p>
       </div>
       <div class="details-grid">
         <div>
@@ -184,8 +186,14 @@
             sizes="(max-width: 480px) 100vw, 480px"
             alt=""
           />
+          <div class="gift-engrave-preview" id="gift-engrave-preview" aria-hidden="true"></div>
         </picture>
         <h2 class="gift-title" id="gift-title">Подарок</h2>
+      </div>
+      <p class="gift-sample-note" id="gift-sample-note"></p>
+      <div class="gift-personal wood-panel" id="gift-personal" hidden>
+        <h3 class="gift-personal-title" id="gift-personal-title"></h3>
+        <dl class="gift-personal-list" id="gift-personal-list"></dl>
       </div>
       <p class="gift-text" id="gift-text"></p>
       <div class="products-block">

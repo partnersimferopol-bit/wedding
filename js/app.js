@@ -103,17 +103,109 @@
     return 19;
   }
 
+  function getUi(key, fallback = '') {
+    return (typeof UI_TEXT !== 'undefined' && UI_TEXT[key]) || fallback;
+  }
+
+  function collectPersonalization() {
+    const items = [];
+    const words = state.words?.trim();
+    if (words) items.push({ key: 'personalWordsLabel', value: words });
+    const d = state.details || {};
+    if (d.name?.trim()) items.push({ key: 'personalNameLabel', value: d.name.trim() });
+    if (d.date?.trim()) items.push({ key: 'personalDateLabel', value: d.date.trim() });
+    if (d.phrase?.trim()) items.push({ key: 'personalPhraseLabel', value: d.phrase.trim() });
+    return items;
+  }
+
+  function truncatePreview(text, max = 90) {
+    const t = String(text).trim();
+    if (t.length <= max) return t;
+    return `${t.slice(0, max - 1)}…`;
+  }
+
+  function buildEngravePreviewLines(items) {
+    const words = items.find((i) => i.key === 'personalWordsLabel');
+    const phrase = items.find((i) => i.key === 'personalPhraseLabel');
+    const name = items.find((i) => i.key === 'personalNameLabel');
+    const date = items.find((i) => i.key === 'personalDateLabel');
+    const lines = [];
+    if (words) lines.push(truncatePreview(words.value, 80));
+    else if (phrase) lines.push(truncatePreview(phrase.value, 80));
+    const meta = [name?.value, date?.value].filter(Boolean).join(' · ');
+    if (meta) lines.push(truncatePreview(meta, 50));
+    return lines;
+  }
+
+  function renderPersonalization() {
+    const items = collectPersonalization();
+    const note = $('#gift-sample-note');
+    const block = $('#gift-personal');
+    const list = $('#gift-personal-list');
+    const overlay = $('#gift-engrave-preview');
+    const titleEl = $('#gift-personal-title');
+
+    if (note) {
+      note.textContent = getUi(
+        'sampleNote',
+        'На картинке — образец. Ваши слова и детали мастер перенесёт на дерево при заказе.'
+      );
+    }
+
+    if (!block || !list) return;
+
+    if (!items.length) {
+      block.hidden = true;
+      if (overlay) {
+        overlay.innerHTML = '';
+        overlay.classList.remove('is-visible');
+        overlay.setAttribute('aria-hidden', 'true');
+      }
+      return;
+    }
+
+    block.hidden = false;
+    if (titleEl) titleEl.textContent = getUi('personalTitle', 'Ваши слова и детали для мастера');
+
+    list.innerHTML = items
+      .map(
+        (item) =>
+          `<div class="gift-personal-row"><dt>${escapeHtml(getUi(item.key, item.key))}</dt><dd>${escapeHtml(item.value)}</dd></div>`
+      )
+      .join('');
+
+    if (overlay) {
+      const lines = buildEngravePreviewLines(items);
+      overlay.innerHTML = lines
+        .map((line) => `<span class="gift-engrave-line">${escapeHtml(line)}</span>`)
+        .join('');
+      overlay.classList.add('is-visible');
+      overlay.setAttribute('aria-hidden', 'false');
+    }
+  }
+
   function personalizeGift(gift) {
     const g = { ...gift };
     let title = g.title;
     const name = state.details.name?.trim();
     if (gift.id === 18 && name) {
       title = `Звезда по имени ${name}`;
+    } else if (name) {
+      title = `${g.title} для ${name}`;
     }
     g.title = title;
+    const parts = [g.text];
     if (state.words.trim()) {
-      g.text = `${g.text}\n\n«${state.words.trim()}» — ваши слова навсегда в дереве.`;
+      parts.push(`\n\n«${state.words.trim()}» — ваши слова навсегда в дереве.`);
     }
+    const d = state.details;
+    const detailBits = [];
+    if (d.phrase?.trim()) detailBits.push(`фраза «${d.phrase.trim()}»`);
+    if (d.date?.trim()) detailBits.push(`дата ${d.date.trim()}`);
+    if (detailBits.length) {
+      parts.push(`\n\nМастер учтёт: ${detailBits.join(', ')}.`);
+    }
+    g.text = parts.join('');
     return g;
   }
 
@@ -223,6 +315,7 @@
     setResultImage(gift.id, gift.title);
     $('#gift-title').textContent = gift.title;
     $('#gift-text').textContent = gift.text;
+    renderPersonalization();
 
     const ul = $('#products-list');
     ul.innerHTML = '';
@@ -241,6 +334,12 @@
   function runLoading() {
     state.giftId = matchGift();
     preloadResultImage(state.giftId);
+    const loadingP = document.querySelector('#screen-loading p');
+    if (loadingP) {
+      loadingP.textContent = collectPersonalization().length
+        ? getUi('loadingPersonal', getUi('loading', 'Мастер создаёт твой подарок…'))
+        : getUi('loading', 'Мастер из будущего создаёт твой подарок…');
+    }
     showScreen('screen-loading');
     setTimeout(showResult, 2800);
   }
@@ -544,6 +643,10 @@
     if (leadH3 && UI_TEXT.leadTitle) leadH3.textContent = UI_TEXT.leadTitle;
     const leadOk = $('#lead-success');
     if (leadOk && UI_TEXT.leadSuccess) leadOk.textContent = UI_TEXT.leadSuccess;
+    const q4 = $('#q4-note');
+    if (q4 && UI_TEXT.q4Note) q4.textContent = UI_TEXT.q4Note;
+    const q5 = $('#q5-note');
+    if (q5 && UI_TEXT.q5Note) q5.textContent = UI_TEXT.q5Note;
     const hints = document.querySelector('.hints');
     if (hints && typeof WORD_HINTS !== 'undefined') {
       hints.innerHTML = WORD_HINTS.map(

@@ -501,11 +501,15 @@ body.game-intro .progress-wrap {
   display: flex;
 }
 
+.question-header h2,
+.question-header .question-note {
+  flex: 1 1 100%;
+}
+
 .question-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
   line-height: 1.35;
-  flex: 1 1 100%;
   color: var(--cream);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
 }
@@ -883,12 +887,93 @@ body.game-intro .progress-wrap {
 
 .gift-picture {
   display: block;
+  position: relative;
   width: 100%;
   margin: 0 0 10px;
   border-radius: 14px;
   overflow: hidden;
   background: transparent;
   line-height: 0;
+}
+
+.gift-engrave-preview {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 6%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(42, 31, 24, 0.82);
+  border: 1px solid rgba(201, 169, 98, 0.55);
+  color: var(--cream);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: center;
+  pointer-events: none;
+  display: none;
+  z-index: 2;
+}
+
+.gift-engrave-preview.is-visible {
+  display: block;
+}
+
+.gift-engrave-line {
+  display: block;
+}
+
+.gift-engrave-line + .gift-engrave-line {
+  margin-top: 4px;
+  font-size: 0.68rem;
+  color: var(--gold-soft);
+}
+
+.gift-sample-note {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--gold-soft);
+  text-align: center;
+  margin: 0 4px 12px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+.gift-personal {
+  margin-bottom: 14px;
+  padding: 14px 16px;
+}
+
+.gift-personal-title {
+  font-size: 0.9rem;
+  margin: 0 0 10px;
+  color: var(--wood-dark);
+}
+
+.gift-personal-list {
+  margin: 0;
+}
+
+.gift-personal-row {
+  margin-bottom: 10px;
+}
+
+.gift-personal-row:last-child {
+  margin-bottom: 0;
+}
+
+.gift-personal-row dt {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--wood-light);
+  margin-bottom: 2px;
+}
+
+.gift-personal-row dd {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: var(--wood-dark);
+  word-break: break-word;
 }
 
 .gift-img {
