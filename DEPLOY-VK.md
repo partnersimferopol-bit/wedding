@@ -44,6 +44,20 @@ VK_NOTIFY_PEER_ID = 2000000000 + 202321163 = 2202321163
 
 ## Шаг 2. Cloudflare Worker (бесплатный тариф)
 
+### Всё из терминала (Windows)
+
+```powershell
+cd "путь\к\igra\worker"
+npm install -g wrangler
+.\setup-leads.ps1
+```
+
+Скрипт по шагам: login → KV → секреты → deploy → запись URL в `js/config-leads.js`.
+
+---
+
+### Вручную
+
 1. Аккаунт на [cloudflare.com](https://www.cloudflare.com).
 2. Установите [Wrangler](https://developers.cloudflare.com/workers/wrangler/install/):
    ```bash
