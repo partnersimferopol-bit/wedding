@@ -15,6 +15,7 @@
     details: { name: '', date: '', phrase: '' },
     style: null,
     giftId: null,
+    selectedProduct: null,
   };
 
   const $ = (sel) => document.querySelector(sel);
@@ -307,6 +308,35 @@
     });
   }
 
+  function renderProductsList(products) {
+    const ul = $('#products-list');
+    if (!ul) return;
+    ul.innerHTML = '';
+    if (!products?.length) {
+      state.selectedProduct = null;
+      return;
+    }
+    if (!state.selectedProduct || !products.includes(state.selectedProduct)) {
+      state.selectedProduct = products[0];
+    }
+    products.forEach((label) => {
+      const li = document.createElement('li');
+      li.className = 'wood-panel product-option';
+      if (label === state.selectedProduct) li.classList.add('selected');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'product-pick-btn';
+      btn.innerHTML = `<span class="product-label">${escapeHtml(label)}</span>`;
+      btn.addEventListener('click', () => {
+        state.selectedProduct = label;
+        ul.querySelectorAll('.product-option').forEach((el) => el.classList.remove('selected'));
+        li.classList.add('selected');
+      });
+      li.appendChild(btn);
+      ul.appendChild(li);
+    });
+  }
+
   function showResult() {
     if (!state.giftId) state.giftId = matchGift();
     let gift = GIFTS[state.giftId] || GIFTS[19];
@@ -317,17 +347,14 @@
     $('#gift-text').textContent = gift.text;
     renderPersonalization();
 
-    const ul = $('#products-list');
-    ul.innerHTML = '';
-    gift.products.forEach((p) => {
-      const li = document.createElement('li');
-      li.className = 'wood-panel';
-      li.innerHTML = `<span class="product-label">${p}</span>`;
-      ul.appendChild(li);
-    });
+    renderProductsList(gift.products);
 
     showScreen('screen-result');
-    $('#lead-success').classList.remove('show');
+    const success = $('#lead-success');
+    if (success) {
+      success.classList.remove('show');
+      success.textContent = getUi('leadSuccess', 'Спасибо! Мастер свяжется с вами. Заявка сохранена.');
+    }
     $('#lead-form').style.display = 'block';
   }
 
@@ -575,12 +602,19 @@
 
   $('#lead-form').addEventListener('submit', (e) => {
     e.preventDefault();
+    const gift = personalizeGift(GIFTS[state.giftId] || GIFTS[19]);
+    const product =
+      state.selectedProduct ||
+      (gift.products && gift.products[0]) ||
+      null;
     const lead = {
       name: $('#lead-name').value.trim(),
       contact: $('#lead-contact').value.trim(),
       comment: $('#lead-comment').value.trim(),
       gift: state.giftId,
-      giftTitle: (GIFTS[state.giftId] || GIFTS[19]).title,
+      giftTitle: gift.title,
+      selectedProduct: product,
+      productsOffered: gift.products || [],
       answers: { ...state },
       at: new Date().toISOString(),
     };
@@ -592,7 +626,13 @@
     $('#lead-success').classList.add('show');
     $('#lead-form').style.display = 'none';
 
-    const tg = `https://t.me/share/url?url=${encodeURIComponent(location.href)}&text=${encodeURIComponent(`Заявка: ${lead.name}, подарок «${lead.giftTitle}»`)}`;
+    const success = $('#lead-success');
+    if (success && product) {
+      success.textContent = `Спасибо! Заявка сохранена: «${product}». Мастер свяжется с вами.`;
+    }
+    const tg = `https://t.me/share/url?url=${encodeURIComponent(location.href)}&text=${encodeURIComponent(
+      `Заявка: ${lead.name}, «${lead.giftTitle}» — ${product || 'подарок'}`
+    )}`;
     console.info('Lead saved:', lead);
     console.info('Для интеграции подключите webhook или Telegram Bot API. Данные в localStorage:', key);
   });
@@ -627,6 +667,7 @@
       details: { name: '', date: '', phrase: '' },
       style: null,
       giftId: null,
+      selectedProduct: null,
     });
     showScreen('screen-intro');
   });
@@ -639,6 +680,8 @@
     if (loading && UI_TEXT.loading) loading.textContent = UI_TEXT.loading;
     const productsH3 = document.querySelector('.products-block h3');
     if (productsH3 && UI_TEXT.productsTitle) productsH3.textContent = UI_TEXT.productsTitle;
+    const productsHint = $('#products-hint');
+    if (productsHint && UI_TEXT.productsHint) productsHint.textContent = UI_TEXT.productsHint;
     const leadH3 = document.querySelector('.lead-form h3');
     if (leadH3 && UI_TEXT.leadTitle) leadH3.textContent = UI_TEXT.leadTitle;
     const leadOk = $('#lead-success');
