@@ -1,5 +1,7 @@
 (function () {
   const STORAGE_KEY = 'gift_future_content';
+  const API_SETTINGS_KEY = 'gift_admin_api_settings';
+  const LEADS_LOCAL_KEY = 'gift_future_leads';
   const $ = (sel) => document.querySelector(sel);
   const toast = $('#toast');
 
@@ -286,30 +288,79 @@ const UI_TEXT = ${JSON.stringify(data.UI_TEXT, null, 2)};
     URL.revokeObjectURL(a.href);
   }
 
-  function refreshLeads() {
-    const list = $('#leads-list');
-    let leads = [];
+  function getApiSettings() {
     try {
-      leads = JSON.parse(localStorage.getItem('gift_future_leads') || '[]');
+      const stored = JSON.parse(localStorage.getItem(API_SETTINGS_KEY) || '{}');
+      const cfg = typeof LEADS_API !== 'undefined' ? LEADS_API : {};
+      return {
+        baseUrl: (stored.baseUrl || cfg.baseUrl || '').trim().replace(/\/$/, ''),
+        adminSecret: stored.adminSecret || cfg.adminSecret || '',
+      };
     } catch {
-      leads = [];
+      return { baseUrl: '', adminSecret: '' };
     }
+  }
+
+  function saveApiSettingsToForm() {
+    const s = getApiSettings();
+    const urlEl = $('#leads-api-url');
+    const secretEl = $('#leads-api-secret');
+    if (urlEl) urlEl.value = s.baseUrl;
+    if (secretEl) secretEl.value = s.adminSecret;
+  }
+
+  function renderLeadsList(leads, sourceNote) {
+    const list = $('#leads-list');
     if (!leads.length) {
-      list.innerHTML = '<li>Заявок пока нет в этом браузере.</li>';
+      list.innerHTML = `<li>Заявок пока нет. ${escapeHtml(sourceNote || '')}</li>`;
       return;
     }
     list.innerHTML = leads
-      .slice()
-      .reverse()
       .map(
         (l) => `<li>
           <time>${escapeHtml(l.at || '')}</time><br>
           <strong>${escapeHtml(l.name || '')}</strong> — ${escapeHtml(l.contact || '')}<br>
           Подарок: ${escapeHtml(l.giftTitle || '')}<br>
+          ${l.selectedProduct ? `Заказ: <strong>${escapeHtml(l.selectedProduct)}</strong><br>` : ''}
           ${l.comment ? `Комментарий: ${escapeHtml(l.comment)}` : ''}
         </li>`
       )
       .join('');
+  }
+
+  async function fetchLeadsFromApi() {
+    const { baseUrl, adminSecret } = getApiSettings();
+    if (!baseUrl) return null;
+    const url = `${baseUrl}/leads${adminSecret ? `?key=${encodeURIComponent(adminSecret)}` : ''}`;
+    const headers = adminSecret ? { Authorization: `Bearer ${adminSecret}` } : {};
+    const res = await fetch(url, { headers });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Ошибка ${res.status}`);
+    return data.leads || [];
+  }
+
+  function loadLeadsLocally() {
+    try {
+      return JSON.parse(localStorage.getItem(LEADS_LOCAL_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  async function refreshLeads() {
+    try {
+      const remote = await fetchLeadsFromApi();
+      if (remote) {
+        renderLeadsList(remote, 'Источник: сервер (все заявки с сайта).');
+        showToast(`Загружено заявок: ${remote.length}`);
+        return;
+      }
+    } catch (err) {
+      console.warn(err);
+      showToast('API: ' + (err.message || err));
+    }
+    const local = loadLeadsLocally().slice().reverse();
+    renderLeadsList(local, 'Только этот браузер. Настройте URL API в DEPLOY-VK.md');
   }
 
   const $$ = (sel) => document.querySelectorAll(sel);
@@ -402,9 +453,26 @@ const UI_TEXT = ${JSON.stringify(data.UI_TEXT, null, 2)};
     btn.addEventListener('click', () => addListRow(btn.dataset.add));
   });
 
-  $('#btn-refresh-leads').addEventListener('click', refreshLeads);
-  $('#btn-export-leads').addEventListener('click', () => {
-    const raw = localStorage.getItem('gift_future_leads') || '[]';
+  $('#btn-save-api-settings').addEventListener('click', () => {
+    const baseUrl = $('#leads-api-url')?.value.trim().replace(/\/$/, '') || '';
+    const adminSecret = $('#leads-api-secret')?.value.trim() || '';
+    localStorage.setItem(API_SETTINGS_KEY, JSON.stringify({ baseUrl, adminSecret }));
+    localStorage.setItem('gift_leads_api_url', baseUrl);
+    showToast('Настройки API сохранены в этом браузере.');
+  });
+
+  $('#btn-refresh-leads').addEventListener('click', () => refreshLeads());
+  $('#btn-export-leads').addEventListener('click', async () => {
+    try {
+      const remote = await fetchLeadsFromApi();
+      if (remote) {
+        downloadFile('leads-export.json', JSON.stringify(remote, null, 2), 'application/json');
+        return;
+      }
+    } catch {
+      /* fallback local */
+    }
+    const raw = localStorage.getItem(LEADS_LOCAL_KEY) || '[]';
     downloadFile('leads-export.json', raw, 'application/json');
   });
 
@@ -421,5 +489,6 @@ const UI_TEXT = ${JSON.stringify(data.UI_TEXT, null, 2)};
   initTabs();
   tryLoadStoredOverrides();
   loadFormsFromGlobals();
+  saveApiSettingsToForm();
   refreshLeads();
 })();

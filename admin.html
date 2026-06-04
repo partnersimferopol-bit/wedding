@@ -102,7 +102,16 @@
 
       <section class="admin-panel" id="panel-leads">
         <h2>Заявки с сайта</h2>
-        <p class="admin-help">Сохраняются в браузере, где пользователь отправил форму (localStorage).</p>
+        <p class="admin-help">При настроенном API — все заявки с сайта + уведомления в ВК. Иначе только этот браузер (localStorage).</p>
+        <div class="field">
+          <label for="leads-api-url">URL API (Cloudflare Worker)</label>
+          <input type="url" id="leads-api-url" placeholder="https://gift-future-leads.xxx.workers.dev">
+        </div>
+        <div class="field">
+          <label for="leads-api-secret">Ключ админки (ADMIN_SECRET)</label>
+          <input type="password" id="leads-api-secret" placeholder="Пароль из wrangler secret">
+        </div>
+        <button type="button" class="btn-outline" id="btn-save-api-settings">Сохранить настройки API</button>
         <button type="button" class="btn-outline" id="btn-refresh-leads">Обновить список</button>
         <button type="button" class="btn-outline" id="btn-export-leads">Скачать заявки (JSON)</button>
         <ul class="leads-list" id="leads-list"></ul>
@@ -116,6 +125,7 @@
           <li>Для постоянной публикации на сайте нажмите <strong>«Скачать data.js»</strong> и замените файл <code>js/data.js</code> в папке проекта.</li>
           <li>Резервная копия: <strong>«Скачать JSON»</strong>. Восстановление: <strong>«Загрузить JSON»</strong>.</li>
           <li>Картинки результатов: <code>assets/images/results/result-N.jpg</code> (N от 1 до 20).</li>
+          <li>Заявки и ВК: инструкция <strong>DEPLOY-VK.md</strong> (Worker + сообщения сообщества).</li>
         </ol>
       </section>
     </main>
@@ -133,6 +143,7 @@
   <div class="toast" id="toast" role="status"></div>
 
   <script src="js/data.js"></script>
+  <script src="js/config-leads.js"></script>
   <script src="js/admin.js"></script>
 </body>
 </html>

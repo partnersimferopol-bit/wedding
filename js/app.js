@@ -600,8 +600,36 @@
     runLoading();
   });
 
-  $('#lead-form').addEventListener('submit', (e) => {
+  function getLeadsApiBase() {
+    const cfg = typeof LEADS_API !== 'undefined' ? LEADS_API : {};
+    const fromStorage = localStorage.getItem('gift_leads_api_url');
+    const base = (fromStorage || cfg.baseUrl || '').trim().replace(/\/$/, '');
+    return base || null;
+  }
+
+  async function submitLeadToServer(lead) {
+    const base = getLeadsApiBase();
+    if (!base) return null;
+    const res = await fetch(`${base}/lead`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lead),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Ошибка ${res.status}`);
+    return data;
+  }
+
+  function saveLeadLocally(lead) {
+    const key = 'gift_future_leads';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    list.push(lead);
+    localStorage.setItem(key, JSON.stringify(list));
+  }
+
+  $('#lead-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = $('#lead-form button[type="submit"]');
     const gift = personalizeGift(GIFTS[state.giftId] || GIFTS[19]);
     const product =
       state.selectedProduct ||
@@ -618,10 +646,21 @@
       answers: { ...state },
       at: new Date().toISOString(),
     };
-    const key = 'gift_future_leads';
-    const list = JSON.parse(localStorage.getItem(key) || '[]');
-    list.push(lead);
-    localStorage.setItem(key, JSON.stringify(list));
+
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      saveLeadLocally(lead);
+      const apiResult = await submitLeadToServer(lead);
+      if (apiResult?.vk?.ok === false) {
+        console.warn('VK notify:', apiResult.vk.error);
+      }
+    } catch (err) {
+      console.error('Lead API:', err);
+      saveLeadLocally(lead);
+    }
+
+    if (submitBtn) submitBtn.disabled = false;
 
     $('#lead-success').classList.add('show');
     $('#lead-form').style.display = 'none';
@@ -630,11 +669,7 @@
     if (success && product) {
       success.textContent = `Спасибо! Заявка сохранена: «${product}». Мастер свяжется с вами.`;
     }
-    const tg = `https://t.me/share/url?url=${encodeURIComponent(location.href)}&text=${encodeURIComponent(
-      `Заявка: ${lead.name}, «${lead.giftTitle}» — ${product || 'подарок'}`
-    )}`;
     console.info('Lead saved:', lead);
-    console.info('Для интеграции подключите webhook или Telegram Bot API. Данные в localStorage:', key);
   });
 
   $('#btn-share').addEventListener('click', async () => {
