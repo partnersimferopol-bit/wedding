@@ -1,5 +1,7 @@
 # Заявки в админку + уведомления в сообщения сообщества ВК
 
+> **Подробная пошаговая инструкция:** [INSTRUKCIYA-ZAYAVKI-VK.md](INSTRUKCIYA-ZAYAVKI-VK.md)
+
 Игра отправляет заявку на **Cloudflare Worker**, он:
 1. сохраняет заявку в хранилище;
 2. шлёт текст в **сообщения ВК** (от имени вашего сообщества).
@@ -97,11 +99,11 @@ npm install -g wrangler
 ```javascript
 const LEADS_API = {
   baseUrl: 'https://gift-future-leads.ВАШ_АККАУНТ.workers.dev',
-  adminSecret: 'тот же ADMIN_SECRET что в wrangler',
+  adminSecret: '',  // пароль только в admin.html, не в GitHub!
 };
 ```
 
-Залейте на GitHub вместе с остальными файлами.
+Залейте на GitHub **только baseUrl** (без токена ВК и без adminSecret).
 
 ---
 
