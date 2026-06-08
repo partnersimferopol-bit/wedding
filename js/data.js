@@ -259,3 +259,13 @@ const UI_TEXT = {
   personalDateLabel: 'Важная дата',
   personalPhraseLabel: 'Фраза / цитата',
 };
+
+/** Юридические ссылки (редактируются в admin.html) */
+const LEGAL_LINKS = {
+  offerUrl: 'oferta.html',
+  privacyUrl: 'privacy.html',
+  offerLabel: 'Публичная оферта',
+  privacyLabel: 'Политика конфиденциальности',
+  consentOffer: 'публичной оферты',
+  consentPrivacy: 'политикой конфиденциальности',
+};

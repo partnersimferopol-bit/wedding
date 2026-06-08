@@ -215,7 +215,11 @@
           <label for="lead-comment">Комментарий (необязательно)</label>
           <textarea id="lead-comment" rows="2" placeholder="Пожелания к заказу"></textarea>
         </div>
-        <button type="submit" class="btn btn-gold">Отправить мастеру в 3Д-лес</button>
+        <label class="lead-consent" id="lead-consent-label">
+          <input type="checkbox" id="lead-consent" required>
+          <span id="lead-consent-text">Я принимаю условия <a href="oferta.html" target="_blank" rel="noopener noreferrer">публичной оферты</a> и соглашаюсь с <a href="privacy.html" target="_blank" rel="noopener noreferrer">политикой конфиденциальности</a></span>
+        </label>
+        <button type="submit" class="btn btn-gold" id="lead-submit" disabled>Отправить мастеру в 3Д-лес</button>
       </form>
       <p class="success-msg" id="lead-success">Спасибо! Мастер свяжется с вами. Заявка сохранена.</p>
       <div class="result-actions">
@@ -233,6 +237,12 @@
         </button>
       </div>
     </section>
+
+    <footer class="site-legal" id="site-legal">
+      <a href="oferta.html" target="_blank" rel="noopener noreferrer" id="link-offer">Публичная оферта</a>
+      <span class="site-legal-sep" aria-hidden="true">·</span>
+      <a href="privacy.html" target="_blank" rel="noopener noreferrer" id="link-privacy">Политика конфиденциальности</a>
+    </footer>
   </div>
 
   <canvas id="share-canvas" width="1080" height="1920"></canvas>

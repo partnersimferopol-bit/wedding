@@ -356,6 +356,16 @@
       success.textContent = getUi('leadSuccess', 'Спасибо! Мастер свяжется с вами. Заявка сохранена.');
     }
     $('#lead-form').style.display = 'block';
+    resetLeadForm();
+  }
+
+  function resetLeadForm() {
+    const form = $('#lead-form');
+    if (form) form.reset();
+    const consent = $('#lead-consent');
+    const submitBtn = $('#lead-submit');
+    if (consent) consent.checked = false;
+    if (submitBtn) submitBtn.disabled = true;
   }
 
   function runLoading() {
@@ -627,9 +637,18 @@
     localStorage.setItem(key, JSON.stringify(list));
   }
 
+  const leadConsent = $('#lead-consent');
+  const leadSubmit = $('#lead-submit');
+  if (leadConsent && leadSubmit) {
+    leadConsent.addEventListener('change', () => {
+      leadSubmit.disabled = !leadConsent.checked;
+    });
+  }
+
   $('#lead-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const submitBtn = $('#lead-form button[type="submit"]');
+    if (leadConsent && !leadConsent.checked) return;
+    const submitBtn = leadSubmit || $('#lead-form button[type="submit"]');
     const gift = personalizeGift(GIFTS[state.giftId] || GIFTS[19]);
     const product =
       state.selectedProduct ||
@@ -707,6 +726,32 @@
     showScreen('screen-intro');
   });
 
+  function applyLegalLinks() {
+    const cfg = typeof LEGAL_LINKS !== 'undefined' ? LEGAL_LINKS : {};
+    const offerUrl = cfg.offerUrl || 'oferta.html';
+    const privacyUrl = cfg.privacyUrl || 'privacy.html';
+    const consentOffer = cfg.consentOffer || 'публичной оферты';
+    const consentPrivacy = cfg.consentPrivacy || 'политикой конфиденциальности';
+
+    const linkOffer = $('#link-offer');
+    const linkPrivacy = $('#link-privacy');
+    if (linkOffer) {
+      linkOffer.href = offerUrl;
+      linkOffer.textContent = cfg.offerLabel || 'Публичная оферта';
+    }
+    if (linkPrivacy) {
+      linkPrivacy.href = privacyUrl;
+      linkPrivacy.textContent = cfg.privacyLabel || 'Политика конфиденциальности';
+    }
+
+    const consentText = $('#lead-consent-text');
+    if (consentText) {
+      consentText.innerHTML =
+        `Я принимаю условия <a href="${escapeHtml(offerUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(consentOffer)}</a> ` +
+        `и соглашаюсь с <a href="${escapeHtml(privacyUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(consentPrivacy)}</a>`;
+    }
+  }
+
   function applyUiText() {
     if (typeof UI_TEXT === 'undefined') return;
     const start = $('#btn-start');
@@ -750,6 +795,7 @@
 
   decorateNavButtons();
   applyUiText();
+  applyLegalLinks();
   showScreen('screen-intro');
   document.body.classList.add('game-intro');
 })();
