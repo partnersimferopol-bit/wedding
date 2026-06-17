@@ -1,6 +1,7 @@
 /**
- * Cloudflare Worker: заявки + уведомление в сообщения сообщества ВК
- * Переменные: VK_GROUP_TOKEN, VK_NOTIFY_PEER_ID, ADMIN_SECRET, LEADS (KV)
+ * Cloudflare Worker: заявки + уведомления ВК и Telegram
+ * Секреты: VK_GROUP_TOKEN, VK_NOTIFY_PEER_ID, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, ADMIN_SECRET
+ * Привязка: LEADS (KV)
  */
 
 const CORS = {
@@ -62,6 +63,31 @@ async function sendVkCommunityMessage(env, text) {
   return { ok: true, message_id: data.response };
 }
 
+async function sendTelegramMessage(env, text) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) {
+    return { skipped: true, reason: 'Telegram not configured' };
+  }
+
+  const res = await fetch(
+    `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: String(env.TELEGRAM_CHAT_ID),
+        text,
+        disable_web_page_preview: true,
+      }),
+    }
+  );
+
+  const data = await res.json();
+  if (!data.ok) {
+    throw new Error(data.description || JSON.stringify(data));
+  }
+  return { ok: true, message_id: data.result?.message_id };
+}
+
 async function loadLeads(env) {
   const raw = await env.LEADS.get('all');
   if (!raw) return [];
@@ -104,6 +130,7 @@ export default {
         return json({
           ok: true,
           vk: !!(env.VK_GROUP_TOKEN && env.VK_NOTIFY_PEER_ID),
+          telegram: !!(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID),
         });
       }
 
@@ -122,15 +149,25 @@ export default {
         lead.at = lead.at || new Date().toISOString();
         const count = await saveLead(env, lead);
 
+        const message = formatLeadMessage(lead);
+
         let vk = { skipped: true };
         try {
-          vk = await sendVkCommunityMessage(env, formatLeadMessage(lead));
+          vk = await sendVkCommunityMessage(env, message);
         } catch (vkErr) {
           console.error('VK send failed:', vkErr);
           vk = { ok: false, error: String(vkErr.message || vkErr) };
         }
 
-        return json({ ok: true, saved: count, vk });
+        let telegram = { skipped: true };
+        try {
+          telegram = await sendTelegramMessage(env, message);
+        } catch (tgErr) {
+          console.error('Telegram send failed:', tgErr);
+          telegram = { ok: false, error: String(tgErr.message || tgErr) };
+        }
+
+        return json({ ok: true, saved: count, vk, telegram });
       }
 
       if (path === '/leads' && request.method === 'GET') {

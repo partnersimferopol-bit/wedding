@@ -43,6 +43,10 @@ Write-Host "   VK_NOTIFY_PEER_ID — для беседы convo/-202321163 обы
 wrangler secret put VK_NOTIFY_PEER_ID
 Write-Host "   ADMIN_SECRET — пароль для админки (заявки)" -ForegroundColor Yellow
 wrangler secret put ADMIN_SECRET
+Write-Host "   TELEGRAM_BOT_TOKEN — токен от @BotFather (Enter чтобы пропустить)" -ForegroundColor Yellow
+wrangler secret put TELEGRAM_BOT_TOKEN
+Write-Host "   TELEGRAM_CHAT_ID — id чата/группы (например -100123... или 123456789)" -ForegroundColor Yellow
+wrangler secret put TELEGRAM_CHAT_ID
 
 Write-Host "`n4) Деплой Worker..." -ForegroundColor Green
 $deployOut = wrangler deploy 2>&1 | Out-String
@@ -83,5 +87,5 @@ Write-Host "Worker URL: $workerUrl"
 Write-Host "Дальше:"
 Write-Host "  - git add js/config-leads.js && git commit && git push  (только baseUrl)"
 Write-Host "  - admin.html -> Заявки -> URL + ADMIN_SECRET -> Сохранить"
-Write-Host "  - Тестовая заявка на сайте -> сообщение в беседе ВК"
+Write-Host "  - Тестовая заявка на сайте -> сообщение в беседе ВК и/или Telegram"
 Write-Host "ADMIN_SECRET: $adminSecretNote"

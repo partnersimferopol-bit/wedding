@@ -4,7 +4,8 @@
 
 Игра отправляет заявку на **Cloudflare Worker**, он:
 1. сохраняет заявку в хранилище;
-2. шлёт текст в **сообщения ВК** (от имени вашего сообщества).
+2. шлёт текст в **сообщения ВК** (от имени вашего сообщества);
+3. шлёт то же в **Telegram** (если настроен бот).
 
 ---
 
@@ -44,6 +45,15 @@ VK_NOTIFY_PEER_ID = 2000000000 + 202321163 = 2202321163
 
 ---
 
+## Шаг 1б. Telegram — бот и chat_id
+
+1. В Telegram: **@BotFather** → `/newbot` → скопируйте **токен** → `TELEGRAM_BOT_TOKEN`.
+2. Напишите боту **/start** (личка) или добавьте бота в **группу** менеджеров.
+3. Откройте в браузере: `https://api.telegram.org/botВАШ_ТОКЕН/getUpdates` — найдите `"chat":{"id":...}` → это `TELEGRAM_CHAT_ID`.
+4. Подробнее: раздел **ЧАСТЬ 1б** в [INSTRUKCIYA-ZAYAVKI-VK.md](INSTRUKCIYA-ZAYAVKI-VK.md).
+
+---
+
 ## Шаг 2. Cloudflare Worker (бесплатный тариф)
 
 ### Всё из терминала (Windows)
@@ -78,6 +88,8 @@ npm install -g wrangler
    wrangler secret put VK_GROUP_TOKEN
    wrangler secret put VK_NOTIFY_PEER_ID
    wrangler secret put ADMIN_SECRET
+   wrangler secret put TELEGRAM_BOT_TOKEN
+   wrangler secret put TELEGRAM_CHAT_ID
    ```
    - `ADMIN_SECRET` — придумайте длинный пароль для входа в админку (список заявок).
 
@@ -88,7 +100,7 @@ npm install -g wrangler
    Получите URL вида: `https://gift-future-leads.ВАШ_АККАУНТ.workers.dev`
 
 6. Проверка:
-   - `https://ВАШ_WORKER/health` → `{"ok":true,"vk":true}`
+   - `https://ВАШ_WORKER/health` → `{"ok":true,"vk":true,"telegram":true}`
 
 ---
 
@@ -120,8 +132,8 @@ const LEADS_API = {
 ## Проверка отправки в ВК
 
 1. Пройдите игру на сайте, отправьте тестовую заявку.
-2. В беседе / ЛС должно появиться сообщение с полями заявки.
-3. Если ошибка — в консоли браузера (F12) ответ `/lead` с полем `vk.error`; сверьте токен и `peer_id`.
+2. В беседе / ЛС / Telegram должно появиться сообщение с полями заявки.
+3. Если ошибка — в консоли браузера (F12) ответ `/lead` с полями `vk.error` и `telegram.error`; сверьте токены и id.
 
 ### Частые ошибки ВК
 
@@ -130,6 +142,14 @@ const LEADS_API = {
 | Can't send messages to this peer | Откройте диалог с сообществом или проверьте peer_id беседы |
 | Access denied | В ключе нет права «Сообщения сообщества» |
 | 901 | Пользователь запретил сообщения — используйте беседу админов |
+
+### Частые ошибки Telegram
+
+| Ошибка | Решение |
+|--------|---------|
+| chat not found | Неверный `TELEGRAM_CHAT_ID` — см. `getUpdates` |
+| Unauthorized | Неверный токен бота |
+| bot was blocked | Напишите боту `/start` |
 
 ---
 

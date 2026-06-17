@@ -674,6 +674,9 @@
       if (apiResult?.vk?.ok === false) {
         console.warn('VK notify:', apiResult.vk.error);
       }
+      if (apiResult?.telegram?.ok === false) {
+        console.warn('Telegram notify:', apiResult.telegram.error);
+      }
     } catch (err) {
       console.error('Lead API:', err);
       saveLeadLocally(lead);
