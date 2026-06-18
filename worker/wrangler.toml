@@ -1,10 +1,11 @@
+﻿account_id = "ff67f8582639c90a713c96c3e8632516"
 name = "gift-future-leads"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
 [[kv_namespaces]]
 binding = "LEADS"
-id = "PASTE_KV_NAMESPACE_ID_AFTER_CREATE"
+id = "4033cc3719d84158ad1c609e184d1e88"
 
 [vars]
-# Не храните токен здесь — только в Secrets (см. DEPLOY-VK.md)
+# РќРµ С…СЂР°РЅРёС‚Рµ С‚РѕРєРµРЅ Р·РґРµСЃСЊ вЂ” С‚РѕР»СЊРєРѕ РІ Secrets (СЃРј. DEPLOY-VK.md)

@@ -1,0 +1,28 @@
+========================================
+  NASTROJKA V BRAUZERE (bez terminala)
+========================================
+
+1. KOD WORKER
+   dash.cloudflare.com -> Workers -> gift-future-leads
+   Edit code -> vstavte ves kod iz worker\src\index.js
+   Save and deploy
+
+2. KV
+   Workers -> KV -> Create -> imya LEADS
+   gift-future-leads -> Settings -> Bindings -> Add KV
+   Variable: LEADS -> namespace LEADS -> Save
+
+3. SEKRETY (Settings -> Variables and Secrets -> Secret)
+   VK_GROUP_TOKEN
+   VK_NOTIFY_PEER_ID = 2202321163
+   ADMIN_SECRET = parol dlya admin.html
+   TELEGRAM_BOT_TOKEN (opcionalno)
+   TELEGRAM_CHAT_ID (opcionalno)
+
+4. URL
+   Skopirujte https://gift-future-leads.XXXX.workers.dev
+   Proverka: URL/health
+
+5. Otpravte URL razrabotchiku dlya obnovleniya sayta
+
+========================================
