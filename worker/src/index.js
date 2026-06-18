@@ -101,6 +101,18 @@ async function loadLeads(env) {
 
 async function saveLead(env, lead) {
   const list = await loadLeads(env);
+  if (lead.id && list.some((item) => item.id === lead.id)) {
+    return list.length;
+  }
+  const recent = list[list.length - 1];
+  if (
+    recent &&
+    recent.name === lead.name &&
+    recent.contact === lead.contact &&
+    recent.at === lead.at
+  ) {
+    return list.length;
+  }
   list.push(lead);
   await env.LEADS.put('all', JSON.stringify(list));
   return list.length;

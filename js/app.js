@@ -655,6 +655,9 @@
       (gift.products && gift.products[0]) ||
       null;
     const lead = {
+      id: (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `lead-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       name: $('#lead-name').value.trim(),
       contact: $('#lead-contact').value.trim(),
       comment: $('#lead-comment').value.trim(),
@@ -668,9 +671,11 @@
 
     if (submitBtn) submitBtn.disabled = true;
 
+    const hasApi = !!getLeadsApiBase();
+
     try {
-      saveLeadLocally(lead);
       const apiResult = await submitLeadToServer(lead);
+      if (!hasApi) saveLeadLocally(lead);
       if (apiResult?.vk?.ok === false) {
         console.warn('VK notify:', apiResult.vk.error);
       }
@@ -682,7 +687,7 @@
       saveLeadLocally(lead);
     }
 
-    if (submitBtn) submitBtn.disabled = false;
+    if (submitBtn) submitBtn.disabled = true;
 
     $('#lead-success').classList.add('show');
     $('#lead-form').style.display = 'none';

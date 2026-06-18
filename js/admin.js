@@ -311,11 +311,19 @@ const UI_TEXT = ${JSON.stringify(data.UI_TEXT, null, 2)};
 
   function renderLeadsList(leads, sourceNote) {
     const list = $('#leads-list');
-    if (!leads.length) {
+    const seen = new Set();
+    const unique = [];
+    for (const l of leads) {
+      const key = l.id || `${l.at}|${l.name}|${l.contact}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      unique.push(l);
+    }
+    if (!unique.length) {
       list.innerHTML = `<li>Заявок пока нет. ${escapeHtml(sourceNote || '')}</li>`;
       return;
     }
-    list.innerHTML = leads
+    list.innerHTML = unique
       .map(
         (l) => `<li>
           <time>${escapeHtml(l.at || '')}</time><br>
